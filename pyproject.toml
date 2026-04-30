@@ -1,0 +1,61 @@
+[project]
+name = "sinpapel-webhooks"
+version = "0.1.0"
+description = "Event-driven HTTP communication para sinpapel — outbound + inbound webhooks (HMAC signing, pluggable delivery backends, idempotency)"
+readme = "README.md"
+requires-python = ">=3.13"
+license = { text = "MIT" }
+authors = [
+    { name = "Julio Adrián", email = "jadrian.s@gmail.com" },
+]
+keywords = ["django", "webhooks", "events", "hmac", "sinpapel", "workflow", "outbound", "inbound"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Framework :: Django",
+    "Framework :: Django :: 5.0",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dependencies = [
+    "sinpapel>=0.1.0,<0.2",
+    "django-simple-history>=3.4",
+    "requests>=2.31",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=9.0",
+    "pytest-django>=4.12",
+    "responses>=0.25",
+]
+celery = [
+    "celery>=5.3",
+]
+drf = [
+    "sinpapel-drf>=0.1.0,<0.2",
+]
+
+[project.urls]
+Homepage = "https://github.com/jadrians/creditos"
+Issues = "https://github.com/jadrians/creditos/issues"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+# Layout pyproject INSIDE-package (lección S12.8) — packages + package_dir explícitos
+[tool.setuptools]
+packages = ["sinpapel_webhooks", "sinpapel_webhooks.delivery", "sinpapel_webhooks.delivery.backends", "sinpapel_webhooks.migrations"]
+
+[tool.setuptools.package-dir]
+sinpapel_webhooks = "."
+
+[tool.pytest.ini_options]
+addopts = "-m 'not install_smoke'"
+markers = [
+    "install_smoke: integration smoke tests requiring uv venv + pip install (skip by default; manual run via -m install_smoke)",
+]
