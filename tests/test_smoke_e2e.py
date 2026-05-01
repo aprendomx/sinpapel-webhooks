@@ -90,15 +90,20 @@ def test_walking_skeleton_outbound_workflow_transition():
     assert headers["User-Agent"].startswith("sinpapel-webhooks/")
     assert headers["Content-Type"] == "application/json; charset=utf-8"
 
-    # Body es JSON serialization del payload
+    # Body envelope structure (S14.2 D4)
     body_bytes = call.request.body
     if isinstance(body_bytes, str):
         body_bytes = body_bytes.encode()
     body = json.loads(body_bytes)
-    assert body["estado_anterior"] == "EN_REVISION"
-    assert body["estado_nuevo"] == "FIRMADO"
-    assert body["comentarios"] == "E2E walking skeleton test"
-    assert body["user_id"] == user.id
+    assert body["event_type"] == "workflow.transition.completed"
+    assert "event_id" in body
+    assert "occurred_at" in body
+    assert "metadata" in body
+    # Domain data nested under "data" key
+    assert body["data"]["estado_anterior"] == "EN_REVISION"
+    assert body["data"]["estado_nuevo"] == "FIRMADO"
+    assert body["data"]["comentarios"] == "E2E walking skeleton test"
+    assert body["data"]["user_id"] == user.id
 
     # HMAC round-trip valida con el secret de la subscription
     verify_signature(

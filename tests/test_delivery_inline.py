@@ -182,6 +182,7 @@ def test_inline_post_signature_verifies_round_trip(delivery, subscription):
 
 @responses.activate
 def test_inline_post_body_contains_event_payload(delivery, event):
+    """S14.2 envelope (D4): body wraps event.payload en `data` key + metadata."""
     responses.add(responses.POST, "https://consumer.test/hook", status=200)
     backend = InlineBackend()
     backend.deliver_now(delivery.id)
@@ -192,8 +193,13 @@ def test_inline_post_body_contains_event_payload(delivery, event):
         body_bytes = body_bytes.encode()
     body = json.loads(body_bytes)
 
-    # S14.1 simple payload — emit_event en T4 enriquecerá con envelope completo
-    assert body == event.payload
+    # Envelope structure (S14.2 D4)
+    assert body["event_type"] == event.event_type
+    assert body["event_id"] == str(event.event_id)
+    assert "occurred_at" in body
+    assert body["data"] == event.payload
+    assert "metadata" in body
+    assert "subscription_id" in body["metadata"]
 
 
 # --- 4xx/5xx failure paths ------------------------------------------------
