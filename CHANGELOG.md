@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — S14.4 (Inbound receiver framework)
+
+- **`@webhook_receiver(source, event)` decorator** + `InboundReceiverRegistry` singleton para registrar handlers.
+- **`ReceiverDispatcher`** con 9-step flow: HMAC verify + idempotency dedup + handler invoke + status persist.
+- **`InboundWebhookView`** plain Django view (NOT DRF) + `csrf_exempt` decorator.
+- **URL routing en `sinpapel_webhooks/urls.py` propio** (D1 architectural deviation: NOT en sinpapel_drf — preserves loose coupling).
+  - `POST /sinpapel/api/webhooks/in/<source>/`
+- **Auto-discovery** via `autodiscover_modules("webhooks")` en `apps.ready()`. Consumer apps con `<app>/webhooks.py` auto-load handlers.
+- **Per-source secrets** vía `SINPAPEL_WEBHOOKS_INBOUND_SECRETS` dict. Source missing → 401.
+- **Status code matrix:**
+  - 200: success (handler invoked) o duplicate (idempotency)
+  - 400: missing required headers o invalid JSON
+  - 401: HMAC invalid o unknown source
+  - 404: no handler registered
+  - 500: handler exception
+- Reuse de S14.1: `verify_signature` + `InboundWebhookEvent` model + `WebhookSignatureError`.
+
 ### Added — S14.3 (Celery adapter)
 
 - **CeleryBackend** (`delivery/backends/celery.py`) — distributed delivery via Celery shared_task.
