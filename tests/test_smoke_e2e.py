@@ -180,6 +180,72 @@ def test_walking_skeleton_consumer_returns_4xx_marks_failed():
 
 @pytest.mark.django_db(transaction=True)
 @responses.activate
+def test_outbox_path_walking_skeleton_via_worker():
+    """E2E S14.2: subscription + transition + worker --once → POST con envelope."""
+    from sinpapel.models.workflow import Estado, SeguimientoWorkflow
+
+    # Override autouse fixture: este test usa outbox + worker
+    get_delivery_backend.cache_clear()
+
+    user = User.objects.create_user(username="outbox-e2e-user", password="x")  # noqa: S106
+    e_anterior = Estado.objects.create(nombre="OUTBOX_ANTES")
+    e_nuevo = Estado.objects.create(nombre="OUTBOX_DESPUES")
+
+    sub = WebhookSubscription.objects.create(
+        name="outbox-e2e-consumer",
+        url="https://outbox.test/webhook",
+        events=["workflow.transition.completed"],
+        secret="outbox-e2e-secret-32bytes-aaa",
+        active=True,
+    )
+    responses.add(responses.POST, "https://outbox.test/webhook", json={"ok": True}, status=200)
+
+    target = WebhookSubscription.objects.create(
+        name="outbox-target", url="https://t.test/h", events=[], secret="s",
+    )
+    target_ct = ContentType.objects.get_for_model(target)
+
+    with override_settings(SINPAPEL_WEBHOOKS_BACKEND="outbox"):
+        get_delivery_backend.cache_clear()
+
+        # Create transition (signal → emit_event → delivery pending; NO POST yet)
+        SeguimientoWorkflow.objects.create(
+            target_content_type=target_ct, target_object_id=target.pk,
+            estado_anterior=e_anterior, estado_nuevo=e_nuevo,
+            usuario_accion=user, comentarios="Outbox path E2E",
+        )
+
+        # No POST yet — outbox.enqueue is no-op
+        assert len(responses.calls) == 0
+        delivery = WebhookDelivery.objects.get(subscription=sub)
+        assert delivery.status == WebhookDelivery.STATUS_PENDING
+
+        # Run worker --once → drain pending + POST
+        from io import StringIO
+        from django.core.management import call_command
+        call_command("sinpapel_webhooks_worker", once=True, stdout=StringIO())
+
+    # POST received with envelope
+    assert len(responses.calls) == 1
+    call = responses.calls[0]
+    body = json.loads(call.request.body if isinstance(call.request.body, bytes) else call.request.body.encode())
+    assert body["event_type"] == "workflow.transition.completed"
+    assert body["data"]["estado_nuevo"] == "OUTBOX_DESPUES"
+
+    # HMAC valid round-trip
+    verify_signature(
+        call.request.body if isinstance(call.request.body, bytes) else call.request.body.encode(),
+        call.request.headers["X-Sinpapel-Signature"],
+        sub.secret,
+    )
+
+    # Delivery delivered
+    delivery.refresh_from_db()
+    assert delivery.status == WebhookDelivery.STATUS_DELIVERED
+
+
+@pytest.mark.django_db(transaction=True)
+@responses.activate
 def test_walking_skeleton_no_subscription_no_post():
     """Sin subscription matching → no POST + no delivery (event sí persistido)."""
     from sinpapel.models.workflow import Estado, SeguimientoWorkflow
