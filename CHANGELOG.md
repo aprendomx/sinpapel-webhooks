@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+(Empty — next features post-v0.1.0; S14.5 admin endpoints + Rate limiting + drf-spectacular polish + multi-tenancy + secret rotation candidates parking lot.)
+
+## [0.1.0] - 2026-05-01
+
+**Epic E14 close.** Distributable via `pip install git+ssh://git@github.com/jadrians/creditos.git#subdirectory=sinpapel_webhooks`. Three-package coexistence (sinpapel core + sinpapel-drf + sinpapel-webhooks) verified.
+
+5 stories delivered + 1 deferred (S14.5 admin endpoints → parking lot). Sub-epics E14a (Outbound 3 backends) + E14b (Inbound) + E14c (Adoption) all complete. 22 patterns nuevos (PAT-J-129..150). 2 ADRs (013 delivery port, 014 HMAC signing). 171 tests added. 99% coverage. Suite total 1212 verdes.
+
 ### Added — S14.6 (Adoption + epic polish)
 
 - **README adoption guide** (`README.md`) — 13 secciones full adoption-focused (S12.8/S13.7 pattern):
@@ -23,9 +31,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 S14.5 admin REST endpoints (subscription CRUD via sinpapel-drf) deferred a parking lot post-E14. Subscription/delivery management v0.1 vía Django admin auto-registered es sufficient para inicial release. Si demanda surge, future epic.
 
-## [0.1.0] - TBD (epic E14 close)
+### Notes — S14.5 deferred (final)
 
-Initial release tras epic E14 close formal. Para detalles agregados durante E14, ver `[Unreleased]` (will be promoted al cerrar epic).
+S14.5 admin REST endpoints (subscription CRUD via sinpapel-drf) deferred a parking lot post-E14. Subscription/delivery management v0.1 vía Django admin auto-registered es sufficient para inicial release. Si demanda surge, future epic.
 
 ---
 
