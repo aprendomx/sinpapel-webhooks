@@ -21,8 +21,7 @@ from .ports import WebhookDeliveryBackend
 _SHORT_NAME_PATHS: dict[str, str] = {
     "inline": "sinpapel_webhooks.delivery.backends.inline.InlineBackend",
     "outbox": "sinpapel_webhooks.delivery.backends.outbox.OutboxBackend",
-    # S14.3:
-    # "celery": "sinpapel_webhooks.delivery.backends.celery.CeleryBackend",
+    "celery": "sinpapel_webhooks.delivery.backends.celery.CeleryBackend",
 }
 
 

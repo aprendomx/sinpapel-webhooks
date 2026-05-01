@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — S14.3 (Celery adapter)
+
+- **CeleryBackend** (`delivery/backends/celery.py`) — distributed delivery via Celery shared_task.
+  - Gated por extra `[celery]` (`pip install sinpapel-webhooks[celery]`).
+  - `enqueue` dispatcha task vía `_deliver_webhook_task.delay()`.
+  - `deliver_now` reusa shared `executor.execute_delivery(allow_retry=True)` (manual retry path).
+  - Lazy import + ImportError descriptive si celery no instalado.
+- Factory short-name `"celery"` agregado.
+- Tests con `current_app.conf.task_always_eager=True` (sync execution sin broker).
+
 ### Added — S14.2 (production outbound)
 
 - **OutboxBackend** (`delivery/backends/outbox.py`) — DB-backed queue, default backend.
