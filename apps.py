@@ -7,7 +7,7 @@ class SinpapelWebhooksConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
 
     def ready(self) -> None:
-        # Signal connections en T4 (S14.1) — loose coupling con sinpapel core.
-        # Por ahora, skeleton sin signals para que migration de modelos en T2
-        # pueda correr sin import side-effects.
-        pass
+        # Loose coupling: import signals para registrar @receiver decorators.
+        # sinpapel core NO importa nada de sinpapel_webhooks; webhooks listens
+        # via signal.connect a sinpapel models declarados con sender="sinpapel.X".
+        from . import signals  # noqa: F401
