@@ -91,12 +91,14 @@ class WebhookDelivery(models.Model):
     STATUS_DELIVERING = "delivering"
     STATUS_DELIVERED = "delivered"
     STATUS_FAILED = "failed"
+    STATUS_DEAD_LETTER = "dead_letter"  # S14.2 — exhausted retry attempts
 
     STATUS_CHOICES = [
         (STATUS_PENDING, "Pending"),
         (STATUS_DELIVERING, "Delivering"),
         (STATUS_DELIVERED, "Delivered"),
         (STATUS_FAILED, "Failed"),
+        (STATUS_DEAD_LETTER, "Dead Letter"),
     ]
 
     subscription = models.ForeignKey(

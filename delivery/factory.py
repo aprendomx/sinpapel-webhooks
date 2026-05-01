@@ -20,8 +20,7 @@ from .ports import WebhookDeliveryBackend
 
 _SHORT_NAME_PATHS: dict[str, str] = {
     "inline": "sinpapel_webhooks.delivery.backends.inline.InlineBackend",
-    # S14.2:
-    # "outbox": "sinpapel_webhooks.delivery.backends.outbox.OutboxBackend",
+    "outbox": "sinpapel_webhooks.delivery.backends.outbox.OutboxBackend",
     # S14.3:
     # "celery": "sinpapel_webhooks.delivery.backends.celery.CeleryBackend",
 }
