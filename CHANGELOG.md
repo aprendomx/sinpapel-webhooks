@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — S14.6 (Adoption + epic polish)
+
+- **README adoption guide** (`README.md`) — 13 secciones full adoption-focused (S12.8/S13.7 pattern):
+  Installation / Quick Start / Settings / Outbound / Inbound / Backends / HMAC Verify (4 langs Python/JS/Ruby/Go) / Workers / Migrations / Troubleshooting / Reference / Versioning / FAQ.
+- **Cross-component E2E test** (`tests/test_cross_component_e2e.py`) — PAT-E-539 integration checkpoint:
+  - HMAC roundtrip outbound↔inbound (byte-exact compatibility verified)
+  - Full outbox pipeline (signal → emit → worker → POST)
+  - 3-backends Protocol conformance
+- **Operational management commands:**
+  - `manage.py sinpapel_webhooks_requeue_dead_letter [--all|--id N]`
+  - `manage.py sinpapel_webhooks_test_subscription <subscription_id>` (synthetic transient payload)
+
+### Notes — S14.5 deferred
+
+S14.5 admin REST endpoints (subscription CRUD via sinpapel-drf) deferred a parking lot post-E14. Subscription/delivery management v0.1 vía Django admin auto-registered es sufficient para inicial release. Si demanda surge, future epic.
+
+## [0.1.0] - TBD (epic E14 close)
+
+Initial release tras epic E14 close formal. Para detalles agregados durante E14, ver `[Unreleased]` (will be promoted al cerrar epic).
+
+---
+
 ### Added — S14.4 (Inbound receiver framework)
 
 - **`@webhook_receiver(source, event)` decorator** + `InboundReceiverRegistry` singleton para registrar handlers.
