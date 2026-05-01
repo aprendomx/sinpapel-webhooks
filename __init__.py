@@ -6,11 +6,19 @@ a URLs configuradas vía WebhookSubscription. Pluggable delivery backends
 (inline / outbox / celery, ADR-013).
 
 Inbound: receiver framework con @webhook_receiver decorator + HMAC verification
-+ idempotency dedup. Routing en sinpapel-drf.
++ idempotency dedup. Routing en sinpapel_webhooks/urls.py propio (S14.4 D1).
 
-Las re-exports públicas (compute_signature, verify_signature, emit_event,
-WebhookDeliveryBackend, etc.) se agregan progresivamente en S14.1-S14.6.
+Public API:
+    from sinpapel_webhooks import webhook_receiver, __version__
 """
 __version__ = "0.1.0"
 
-__all__ = ["__version__"]
+# Lazy re-export to avoid Django app loading issues at module import time
+def __getattr__(name: str):
+    if name == "webhook_receiver":
+        from .receivers.registry import webhook_receiver
+        return webhook_receiver
+    raise AttributeError(f"module 'sinpapel_webhooks' has no attribute {name!r}")
+
+
+__all__ = ["__version__", "webhook_receiver"]
