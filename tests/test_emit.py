@@ -2,6 +2,10 @@
 
 Verifies subscription filter (active + events__contains), delivery creation,
 backend.enqueue invocation, GFK populating.
+
+S14.2 update: default backend cambió a "outbox" (enqueue no-op). Tests aquí
+override a "inline" para validar emit_event semantics inmediatas (deliver
+sync vs persistir pending).
 """
 from __future__ import annotations
 
@@ -9,13 +13,24 @@ from unittest.mock import patch
 
 import pytest
 import responses
+from django.test import override_settings
 
+from sinpapel_webhooks.delivery.factory import get_delivery_backend
 from sinpapel_webhooks.emit import emit_event
 from sinpapel_webhooks.models import (
     WebhookDelivery,
     WebhookEvent,
     WebhookSubscription,
 )
+
+
+@pytest.fixture(autouse=True)
+def _use_inline_backend():
+    """S14.2: default backend cambió a outbox; estos tests asumen inline."""
+    get_delivery_backend.cache_clear()
+    with override_settings(SINPAPEL_WEBHOOKS_BACKEND="inline"):
+        yield
+    get_delivery_backend.cache_clear()
 
 
 @pytest.fixture

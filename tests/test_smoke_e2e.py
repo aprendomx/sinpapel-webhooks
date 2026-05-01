@@ -19,6 +19,7 @@ import pytest
 import responses
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
+from django.test import override_settings
 
 from sinpapel_webhooks.delivery.factory import get_delivery_backend
 from sinpapel_webhooks.models import (
@@ -27,6 +28,16 @@ from sinpapel_webhooks.models import (
     WebhookSubscription,
 )
 from sinpapel_webhooks.signing import verify_signature
+
+
+@pytest.fixture(autouse=True)
+def _use_inline_backend():
+    """Walking skeleton tests asumen inline (sync POST). Outbox path test
+    explícito en S14.2 T5 con override_settings + worker --once."""
+    get_delivery_backend.cache_clear()
+    with override_settings(SINPAPEL_WEBHOOKS_BACKEND="inline"):
+        yield
+    get_delivery_backend.cache_clear()
 
 
 @pytest.mark.django_db(transaction=True)

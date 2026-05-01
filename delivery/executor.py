@@ -26,6 +26,7 @@ from sinpapel_webhooks import __version__ as webhooks_version
 from sinpapel_webhooks.models import WebhookDelivery
 from sinpapel_webhooks.signing import compute_signature
 
+from . import retry
 from .ports import DeliveryResult
 
 
@@ -146,28 +147,52 @@ def _persist_failure(
     *,
     allow_retry: bool,
 ) -> None:
-    """Persiste failure según semántica retry-aware (T2 retry policy aún no integrada)."""
+    """Persiste failure según semántica retry-aware.
+
+    Inline (allow_retry=False): primer fail → status="failed", sin retry.
+    Outbox (allow_retry=True): según retry policy:
+      - 4xx semantic → status="failed" (no retry)
+      - 5xx/timeout + attempts < max → status="pending", scheduled_at=next_retry
+      - 5xx/timeout + attempts >= max → status="dead_letter" o "failed" (gated)
+    """
     delivery.last_response_status = result.status_code
     delivery.last_response_body = (result.response_body or "")[:5000]
     if result.error:
         delivery.last_error = result.error
 
+    update_fields = ["status", "last_response_status", "last_response_body", "last_error"]
+
     if not allow_retry:
-        # Inline semantics: primer fail → failed (no retry, no dead_letter)
+        # Inline semantics: primer fail → failed (no retry)
         delivery.status = WebhookDelivery.STATUS_FAILED
-        delivery.save(
-            update_fields=[
-                "status", "last_response_status", "last_response_body", "last_error",
-            ],
-        )
+        delivery.save(update_fields=update_fields)
         return
 
-    # T2 (retry policy) integrará compute_next_retry_at + dead_letter logic aquí.
-    # Por ahora (post-T1, pre-T2): mismo comportamiento que inline (failed).
-    # OutboxBackend en T3 sobreescribirá _persist_failure con retry-aware version.
-    delivery.status = WebhookDelivery.STATUS_FAILED
-    delivery.save(
-        update_fields=[
-            "status", "last_response_status", "last_response_body", "last_error",
-        ],
+    # Outbox semantics: retry policy decision
+    if not retry.should_retry(result.status_code, result.error):
+        # 4xx semantic — config error, no retry
+        delivery.status = WebhookDelivery.STATUS_FAILED
+        delivery.save(update_fields=update_fields)
+        return
+
+    max_attempts = getattr(settings, "SINPAPEL_WEBHOOKS_MAX_ATTEMPTS", 5)
+    if delivery.attempts >= max_attempts:
+        # Exhausted — dead_letter (gated) or failed
+        if getattr(settings, "SINPAPEL_WEBHOOKS_DEAD_LETTER_AFTER_ATTEMPTS", True):
+            delivery.status = WebhookDelivery.STATUS_DEAD_LETTER
+        else:
+            delivery.status = WebhookDelivery.STATUS_FAILED
+        delivery.save(update_fields=update_fields)
+        return
+
+    # Schedule retry: status back to pending, update scheduled_at
+    backoff_list = getattr(
+        settings, "SINPAPEL_WEBHOOKS_RETRY_BACKOFF",
+        [60, 300, 1800, 7200, 43200],
     )
+    delivery.status = WebhookDelivery.STATUS_PENDING
+    delivery.scheduled_at = retry.compute_next_retry_at(
+        delivery.attempts, backoff_list=backoff_list,
+    )
+    update_fields.append("scheduled_at")
+    delivery.save(update_fields=update_fields)
