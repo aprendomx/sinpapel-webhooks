@@ -1,6 +1,6 @@
 [project]
 name = "sinpapel-webhooks"
-version = "0.1.0"
+version = "0.1.1"
 description = "Event-driven HTTP communication para sinpapel — outbound + inbound webhooks (HMAC signing, pluggable delivery backends, idempotency)"
 readme = "README.md"
 requires-python = ">=3.13"
@@ -21,7 +21,7 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 dependencies = [
-    "sinpapel @ git+ssh://git@github.com/aprendomx/sinpapel.git@v0.1.0",
+    "sinpapel @ git+ssh://git@github.com/aprendomx/sinpapel.git@v0.1.1",
     "django-simple-history>=3.4",
     "requests>=2.31",
 ]
@@ -47,9 +47,18 @@ Issues = "https://github.com/jadrians/creditos/issues"
 requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
-# Layout pyproject INSIDE-package (lección S12.8) — packages + package_dir explícitos
+# Layout flat post split E16 — package files at repo root.
+# Subpackages declarados explícitamente (mantiene determinismo + visibilidad).
 [tool.setuptools]
-packages = ["sinpapel_webhooks", "sinpapel_webhooks.delivery", "sinpapel_webhooks.delivery.backends", "sinpapel_webhooks.migrations"]
+packages = [
+    "sinpapel_webhooks",
+    "sinpapel_webhooks.delivery",
+    "sinpapel_webhooks.delivery.backends",
+    "sinpapel_webhooks.management",
+    "sinpapel_webhooks.management.commands",
+    "sinpapel_webhooks.migrations",
+    "sinpapel_webhooks.receivers",
+]
 
 [tool.setuptools.package-dir]
 sinpapel_webhooks = "."
