@@ -5,7 +5,7 @@
 > Stripe-compatible, pluggable delivery backends (inline / outbox / celery),
 > idempotency dedup. Production-ready sin broker dependency.
 
-**Status:** v0.1.0 — distributable via `pip install git+ssh://...`. See [CHANGELOG](CHANGELOG.md).
+**Status:** v0.2.0 — event catalog expansion + Admin REST API. See [CHANGELOG](CHANGELOG.md) · [README en español](README.es.md).
 
 ---
 
@@ -13,16 +13,16 @@
 
 ```bash
 # Core (incluye outbox backend default — DB-backed queue, no broker required)
-pip install "git+ssh://git@github.com/jadrians/creditos.git#subdirectory=sinpapel_webhooks"
+pip install "git+ssh://git@github.com/aprendomx/sinpapel-webhooks.git@v0.2.0"
 
 # Con Celery distributed delivery (gated por extra)
-pip install "git+ssh://git@github.com/jadrians/creditos.git#subdirectory=sinpapel_webhooks[celery]"
+pip install "sinpapel-webhooks[celery] @ git+ssh://git@github.com/aprendomx/sinpapel-webhooks.git@v0.2.0"
 
-# Con sinpapel-drf admin endpoints (futuro — S14.5 deferred)
-# pip install "git+ssh://...sinpapel_webhooks[drf]"
+# Con Admin REST API (Subscriptions CRUD + Deliveries/Events read — v0.2.0)
+pip install "sinpapel-webhooks[admin] @ git+ssh://git@github.com/aprendomx/sinpapel-webhooks.git@v0.2.0"
 ```
 
-**Requirements:** Python ≥3.13, Django ≥4.2, sinpapel ≥0.1.
+**Requirements:** Python ≥3.13, Django ≥4.2, sinpapel ≥0.5.0 (for full v0.2.0 event catalog; older sinpapel still works defensively — only the 2 `post_save`-driven events fire).
 
 ---
 
@@ -638,9 +638,10 @@ from sinpapel_webhooks.models import (
 
 ## 12. Versioning
 
+- **v0.2.0** (2026-05-16) — Event catalog expansion (7 new event types) + Admin REST API (Subscriptions CRUD + Deliveries read/retry + Events/InboundEvents read). Requires `sinpapel >=0.5.0` for the 4 signal-driven events; older sinpapel still loads (defensive import) with 2 `post_save`-driven events functional.
 - **v0.1.0** (2026-05-01) — Initial release. Epic E14 close.
-- **Lockstep:** `sinpapel_webhooks 0.1.x` requires `sinpapel >=0.1.0,<0.2`.
-- **Future:** v0.2 may add admin endpoints (sinpapel-drf REST CRUD), secret rotation, mTLS, Kafka backend.
+- **Lockstep:** `sinpapel_webhooks 0.2.x` requires `sinpapel >=0.5.0,<0.6` for full feature set (degrades gracefully on older sinpapel).
+- **Future:** v0.3 may add rate limiting, drf-spectacular OpenAPI schema, multi-tenancy, mTLS, Kafka backend.
 
 See [CHANGELOG.md](CHANGELOG.md) for full change history.
 
@@ -680,15 +681,17 @@ Inbound es server-to-server JSON only — DRF parser/renderer overhead innecesar
 
 ### ¿Sinpapel-webhooks soporta WebSocket / SSE?
 
-No en v0.1. Para push real-time usar Channels separado. Webhooks son HTTP POST callbacks event-driven.
+No. Para push real-time usar Channels separado. Webhooks son HTTP POST callbacks event-driven.
 
 ### ¿Hay admin REST endpoints (subscription CRUD)?
 
-No en v0.1 (S14.5 deferred). Usar Django admin auto-registered o shell. v0.2 puede agregar via sinpapel-drf integration.
+**Sí, desde v0.2.0.** Install con `pip install sinpapel-webhooks[admin]` y monta el include — automáticamente expone `/sinpapel/api/webhooks/admin/subscriptions/` (CRUD + rotate-secret + test), `/admin/deliveries/` (read + retry + requeue-dead-letter), `/admin/events/`, `/admin/inbound-events/`. Default permission `IsAdminUser`; override via `SINPAPEL_WEBHOOKS_ADMIN_PERMISSION` setting.
 
 ### ¿Cómo rotar secrets?
 
-v0.1: update `SINPAPEL_WEBHOOKS_INBOUND_SECRETS` o `WebhookSubscription.secret` field. Restart Django process. v0.2 may add dual-secret overlap window.
+**Outbound (v0.2.0+):** `POST /sinpapel/api/webhooks/admin/subscriptions/{id}/rotate-secret/` — server genera 32-byte hex nuevo y la response devuelve el valor en plaintext (única vez). El campo `secret` en GET/PATCH viene enmascarado (`***` + last 4 chars).
+
+**Inbound:** update `SINPAPEL_WEBHOOKS_INBOUND_SECRETS` dict y restart Django process. Dual-secret overlap window queda en backlog.
 
 ---
 
