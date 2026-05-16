@@ -1,25 +1,29 @@
-"""sinpapel-webhooks URL routing (S14.4 / T3, D1).
+"""sinpapel-webhooks URL routing.
 
-Inbound webhook endpoint. Consumer wires up via:
+Mounts:
+- POST /in/<source>/        Inbound receiver (always available).
+- /admin/                   Admin REST API (only if DRF is installed).
 
-    # mossc/urls.py
-    urlpatterns = [
-        path("sinpapel/api/webhooks/", include("sinpapel_webhooks.urls")),
-    ]
-
-D1 architectural deviation (epic design.md §3.6): URL routing en
-sinpapel_webhooks PROPIO (NOT en sinpapel_drf) para preservar loose coupling.
-Plain Django view sufficient para server-to-server JSON.
+Consumer wires up via:
+    path("sinpapel/api/webhooks/", include("sinpapel_webhooks.urls"))
 """
 from __future__ import annotations
 
-from django.urls import path
+from django.urls import include, path
 
 from .views import InboundWebhookView
-
 
 app_name = "sinpapel_webhooks"
 
 urlpatterns = [
     path("in/<str:source>/", InboundWebhookView.as_view(), name="inbound"),
 ]
+
+# Admin REST API — gated by DRF being importable AND the `[admin]` extra installed.
+try:
+    import rest_framework  # noqa: F401
+    from .admin_api.urls import urlpatterns as _admin_urls  # noqa: F401
+except ImportError:
+    pass
+else:
+    urlpatterns += [path("admin/", include((_admin_urls, "admin_api"), namespace="admin"))]
