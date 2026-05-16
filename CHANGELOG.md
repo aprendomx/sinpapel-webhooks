@@ -7,7 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-(Empty — next features post-v0.2.0; rate limiting + drf-spectacular polish + multi-tenancy candidates parking lot.)
+(Empty — next features post-v0.2.1; rate limiting + drf-spectacular polish + multi-tenancy candidates parking lot.)
+
+## [0.2.1] - 2026-05-16
+
+### Changed
+
+- Refreshed `README.md` for v0.2.0 — install URLs now point to `aprendomx/sinpapel-webhooks.git@v0.2.x` (was legacy `creditos.git#subdirectory=` monorepo path); status header, Versioning section, and FAQ entries on Admin REST + secret rotation now describe the shipped feature instead of saying "deferred to v0.2".
+- Added `README.es.md` — full Spanish parallel of the README covering all 13 sections, cross-linked from the English status header.
+
+Docs-only patch; no API or behavior changes.
 
 ## [0.2.0] - 2026-05-16
 
