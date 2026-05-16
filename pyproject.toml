@@ -38,6 +38,9 @@ celery = [
 drf = [
     "sinpapel-drf @ git+ssh://git@github.com/aprendomx/sinpapel-drf.git@v0.1.0",
 ]
+admin = [
+    "djangorestframework>=3.14",
+]
 
 [project.urls]
 Homepage = "https://github.com/jadrians/creditos"
@@ -58,6 +61,7 @@ packages = [
     "sinpapel_webhooks.management.commands",
     "sinpapel_webhooks.migrations",
     "sinpapel_webhooks.receivers",
+    "sinpapel_webhooks.admin_api",
 ]
 
 [tool.setuptools.package-dir]
