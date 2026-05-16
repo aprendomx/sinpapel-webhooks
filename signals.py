@@ -150,3 +150,161 @@ def on_instancia_documento(sender: type[Model], instance: Model, created: bool, 
     transaction.on_commit(
         lambda: emit_event("document.uploaded", payload, source=instance)
     )
+
+
+# --- CondicionTransicion → workflow.predicate.configured ------------------
+
+
+@receiver(post_save, sender="sinpapel.CondicionTransicion")
+def on_condicion_transicion(sender: type[Model], instance: Model, created: bool, **kwargs: Any) -> None:
+    """Emit workflow.predicate.configured on CondicionTransicion create/update."""
+    payload: dict[str, Any] = {
+        "condicion_id": instance.pk,
+        "transicion_id": getattr(instance, "transicion_id", None),
+        "tipo": getattr(instance, "tipo", None),
+        "configuracion": getattr(instance, "configuracion", None) or {},
+        "mensaje_error": getattr(instance, "mensaje_error", "") or "",
+        "orden": getattr(instance, "orden", 0),
+        "activo": bool(getattr(instance, "activo", False)),
+        "action": "created" if created else "updated",
+    }
+    transaction.on_commit(
+        lambda: emit_event("workflow.predicate.configured", payload, source=instance)
+    )
+
+
+# --- SLAConfiguracion → sla.configured ------------------------------------
+
+
+@receiver(post_save, sender="sinpapel.SLAConfiguracion")
+def on_sla_configuracion(sender: type[Model], instance: Model, created: bool, **kwargs: Any) -> None:
+    """Emit sla.configured on SLAConfiguracion create/update."""
+    payload: dict[str, Any] = {
+        "sla_id": instance.pk,
+        "estado_id": getattr(instance, "estado_id", None),
+        "dias_maximos": getattr(instance, "dias_maximos", None),
+        "accion_vencimiento": getattr(instance, "accion_vencimiento", None),
+        "configuracion_accion": getattr(instance, "configuracion_accion", None) or {},
+        "activo": bool(getattr(instance, "activo", False)),
+        "action": "created" if created else "updated",
+    }
+    transaction.on_commit(
+        lambda: emit_event("sla.configured", payload, source=instance)
+    )
+
+
+# --- Custom sinpapel signals (v0.5+) --------------------------------------
+# Defensive import: tolerate older sinpapel versions without these signals.
+
+try:
+    from sinpapel.signals import (
+        predicate_failed,
+        sla_action_executed,
+        sla_breached,
+        transition_preview_requested,
+    )
+except ImportError:  # pragma: no cover — older sinpapel pin
+    predicate_failed = None
+    sla_breached = None
+    sla_action_executed = None
+    transition_preview_requested = None
+
+
+def on_predicate_failed(sender: type[Model], target: Any, condicion: Any, user: Any, target_state: str, **kwargs: Any) -> None:
+    """Receiver for sinpapel.signals.predicate_failed → emit workflow.predicate.failed."""
+    target_ct = None
+    target_id = None
+    if target is not None:
+        from django.contrib.contenttypes.models import ContentType
+        target_ct = ContentType.objects.get_for_model(target).model
+        target_id = getattr(target, "pk", None)
+
+    payload: dict[str, Any] = {
+        "condicion_id": getattr(condicion, "pk", None),
+        "tipo": getattr(condicion, "tipo", None),
+        "mensaje_error": getattr(condicion, "mensaje_error", "") or "",
+        "transicion_id": getattr(condicion, "transicion_id", None),
+        "target_object_id": target_id,
+        "target_content_type": target_ct,
+        "target_state": target_state,
+        "user_id": _safe_user_id(user),
+    }
+    transaction.on_commit(
+        lambda: emit_event("workflow.predicate.failed", payload, source=target)
+    )
+
+
+def on_sla_breached(sender: type[Model], target: Any, sla: Any, dias_transcurridos: int, **kwargs: Any) -> None:
+    """Receiver for sinpapel.signals.sla_breached → emit sla.breached."""
+    target_ct = None
+    target_id = None
+    if target is not None:
+        from django.contrib.contenttypes.models import ContentType
+        target_ct = ContentType.objects.get_for_model(target).model
+        target_id = getattr(target, "pk", None)
+
+    payload: dict[str, Any] = {
+        "sla_id": getattr(sla, "pk", None),
+        "estado": getattr(getattr(sla, "estado", None), "nombre", None),
+        "dias_maximos": getattr(sla, "dias_maximos", None),
+        "dias_transcurridos": dias_transcurridos,
+        "target_object_id": target_id,
+        "target_content_type": target_ct,
+    }
+    transaction.on_commit(
+        lambda: emit_event("sla.breached", payload, source=target)
+    )
+
+
+def on_sla_action_executed(sender: type[Model], target: Any, sla: Any, accion: str, resultado: dict[str, Any], **kwargs: Any) -> None:
+    """Receiver for sinpapel.signals.sla_action_executed → emit sla.action.executed."""
+    target_ct = None
+    target_id = None
+    if target is not None:
+        from django.contrib.contenttypes.models import ContentType
+        target_ct = ContentType.objects.get_for_model(target).model
+        target_id = getattr(target, "pk", None)
+
+    payload: dict[str, Any] = {
+        "sla_id": getattr(sla, "pk", None),
+        "accion": accion,
+        "configuracion_accion": getattr(sla, "configuracion_accion", None) or {},
+        "resultado": resultado or {},
+        "target_object_id": target_id,
+        "target_content_type": target_ct,
+    }
+    transaction.on_commit(
+        lambda: emit_event("sla.action.executed", payload, source=target)
+    )
+
+
+def on_transition_preview_requested(sender: type[Model], target: Any, target_state: str, user: Any, reporte: dict[str, Any], **kwargs: Any) -> None:
+    """Receiver for sinpapel.signals.transition_preview_requested → emit workflow.transition.preview."""
+    target_ct = None
+    target_id = None
+    if target is not None:
+        from django.contrib.contenttypes.models import ContentType
+        target_ct = ContentType.objects.get_for_model(target).model
+        target_id = getattr(target, "pk", None)
+
+    payload: dict[str, Any] = {
+        "target_object_id": target_id,
+        "target_content_type": target_ct,
+        "target_state": target_state,
+        "user_id": _safe_user_id(user),
+        "permitido": bool(reporte.get("permitido", False)),
+        "razones_bloqueo": reporte.get("razones_bloqueo", []),
+        "side_effects": reporte.get("side_effects", []),
+        "documentos_faltantes": reporte.get("documentos_faltantes", []),
+        "predicados_fallidos": reporte.get("predicados_fallidos", []),
+    }
+    transaction.on_commit(
+        lambda: emit_event("workflow.transition.preview", payload, source=target)
+    )
+
+
+if predicate_failed is not None:
+    predicate_failed.connect(on_predicate_failed, dispatch_uid="sinpapel_webhooks.on_predicate_failed")
+    sla_breached.connect(on_sla_breached, dispatch_uid="sinpapel_webhooks.on_sla_breached")
+    sla_action_executed.connect(on_sla_action_executed, dispatch_uid="sinpapel_webhooks.on_sla_action_executed")
+    transition_preview_requested.connect(on_transition_preview_requested, dispatch_uid="sinpapel_webhooks.on_transition_preview_requested")

@@ -177,6 +177,92 @@ emit_event(
 )
 ```
 
+### Event catalog (v0.2.0)
+
+10 canonical event types. Subscribe to any of them via the `events` JSON list on `WebhookSubscription`.
+
+| event_type | Trigger | Requires |
+|---|---|---|
+| `workflow.transition.completed` | `SeguimientoWorkflow` create | sinpapel ≥ 0.1.0 |
+| `signature.completed` | `RegistroFirma` create | sinpapel ≥ 0.1.0 |
+| `document.uploaded` | `InstanciaDocumento` create | sinpapel ≥ 0.1.0 |
+| `workflow.predicate.configured` | `CondicionTransicion` create/update | sinpapel ≥ 0.4.0 |
+| `workflow.predicate.failed` | `WorkflowEngine` rejects a transition due to a `CondicionTransicion` | sinpapel ≥ 0.5.0 (custom Signal) |
+| `workflow.transition.preview` | `WorkflowEngine.preview_transition` (opt-in via `SINPAPEL_EMIT_PREVIEW_EVENTS=True`) | sinpapel ≥ 0.5.0 |
+| `sla.configured` | `SLAConfiguracion` create/update | sinpapel ≥ 0.4.0 |
+| `sla.breached` | `SLAEngine` detects instance exceeded `dias_maximos` | sinpapel ≥ 0.5.0 |
+| `sla.action.executed` | `SLAEngine` dispatched a `_accion_*` handler (notificar / escalar / rechazar / alertar) | sinpapel ≥ 0.5.0 |
+| `workflow.metadata.captured` | Consumer-emit (call `emit_event(...)` from your own post_save on models using `MetadatosCapturables`) | — |
+
+**Loose coupling note:** events that need ≥ 0.5.0 use custom Django Signals declared in `sinpapel.signals` (the receivers are auto-connected at `apps.ready()`). Older sinpapel still works — the defensive `try: from sinpapel.signals import ...` falls back, so only `post_save`-driven events fire.
+
+## Admin REST API (v0.2.0)
+
+Install the extra:
+
+```bash
+pip install sinpapel-webhooks[admin]
+```
+
+Mount the URLs (same `include` as the inbound endpoint):
+
+```python
+# myproject/urls.py
+urlpatterns = [
+    path("sinpapel/api/webhooks/", include("sinpapel_webhooks.urls")),
+]
+```
+
+Routes (all under `/sinpapel/api/webhooks/admin/`):
+
+| Verb + Path | Purpose |
+|---|---|
+| `GET    /admin/subscriptions/` | List subscriptions (paginated) |
+| `POST   /admin/subscriptions/` | Create — response returns `secret` ONCE in plaintext |
+| `GET    /admin/subscriptions/{id}/` | Retrieve — `secret` masked (`***` + last 4 chars) |
+| `PATCH  /admin/subscriptions/{id}/` | Update — `secret` is read-only here |
+| `DELETE /admin/subscriptions/{id}/` | Delete |
+| `POST   /admin/subscriptions/{id}/rotate-secret/` | Rotate secret — response returns new value once |
+| `POST   /admin/subscriptions/{id}/test/` | Send synthetic delivery via `InlineBackend` |
+| `GET    /admin/deliveries/` | List deliveries — filters: `?status=`, `?subscription=`, `?since=` |
+| `GET    /admin/deliveries/{id}/` | Retrieve delivery |
+| `POST   /admin/deliveries/{id}/retry/` | Re-enqueue a delivery (resets to pending) |
+| `POST   /admin/deliveries/requeue-dead-letter/` | Body `{ids: [...]}` or `{all: true}` |
+| `GET    /admin/events/` | List events with `delivery_count` |
+| `GET    /admin/events/{id}/` | Retrieve event with embedded deliveries |
+| `GET    /admin/inbound-events/` | List inbound dedup log — filters: `?source=`, `?handler_status=`, `?since=` |
+| `GET    /admin/inbound-events/{id}/` | Retrieve inbound event |
+
+### Authentication
+
+Default permission: `rest_framework.permissions.IsAdminUser`. Override with the setting:
+
+```python
+SINPAPEL_WEBHOOKS_ADMIN_PERMISSION = "myapp.permissions.IsOpsTeam"
+```
+
+Resolved via `import_string` at module import; invalid dotted paths raise `ImproperlyConfigured`.
+
+### Examples
+
+```bash
+# Create a subscription (note: response body is the ONLY time the full secret is visible)
+curl -X POST https://api.example.com/sinpapel/api/webhooks/admin/subscriptions/ \
+  -H "Authorization: Token <admin-token>" \
+  -H "Content-Type: application/json" \
+  -d '{"name":"ops","url":"https://ops.example.com/hook","events":["workflow.transition.completed"],"secret":"<32-byte-hex>"}'
+
+# Rotate the secret (server generates a new 32-byte hex value)
+curl -X POST https://api.example.com/sinpapel/api/webhooks/admin/subscriptions/5/rotate-secret/ \
+  -H "Authorization: Token <admin-token>"
+
+# Re-enqueue all dead-lettered deliveries
+curl -X POST https://api.example.com/sinpapel/api/webhooks/admin/deliveries/requeue-dead-letter/ \
+  -H "Authorization: Token <admin-token>" \
+  -H "Content-Type: application/json" \
+  -d '{"all": true}'
+```
+
 ---
 
 ## 5. Inbound

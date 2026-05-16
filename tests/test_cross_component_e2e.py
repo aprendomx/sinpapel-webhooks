@@ -205,3 +205,47 @@ def test_three_backends_protocol_conformance():
             assert isinstance(backend, expected_class), (
                 f"Factory NO resuelve '{short_name}' a {expected_class.__name__}"
             )
+
+
+# --- workflow.predicate.configured HMAC roundtrip (v0.2.0) ----------------
+
+
+@pytest.mark.django_db(transaction=True)
+@responses.activate
+def test_predicate_configured_emits_hmac_signed_delivery_e2e(settings):
+    """post_save CondicionTransicion → HMAC-signed POST verifiable on receiver side."""
+    from sinpapel.models import ConfiguracionTransicion, Estado, VersionFlujo
+    from sinpapel.models.predicates import CondicionTransicion
+
+    from sinpapel_webhooks.signing import verify_signature
+
+    settings.SINPAPEL_WEBHOOKS_BACKEND = "inline"
+    get_delivery_backend.cache_clear()
+    responses.add(
+        responses.POST, "https://hook.test/predicate",
+        json={"acked": True}, status=200,
+    )
+    sub = WebhookSubscription.objects.create(
+        name="hook", url="https://hook.test/predicate",
+        events=["workflow.predicate.configured"],
+        secret="topsecret-32-bytes-of-fun",
+        active=True,
+    )
+
+    e_a = Estado.objects.create(nombre="A-E2E")
+    e_b = Estado.objects.create(nombre="B-E2E")
+    flujo = VersionFlujo.objects.create(nombre="F-E2E-PC", activo=True)
+    config_t = ConfiguracionTransicion.objects.create(
+        flujo=flujo, estado_origen=e_a, estado_destino=e_b,
+    )
+    CondicionTransicion.objects.create(
+        transicion=config_t, tipo="json_logic",
+        configuracion={"rule": {"==": [1, 1]}}, mensaje_error="ok", activo=True,
+    )
+
+    assert len(responses.calls) == 1
+    call = responses.calls[0]
+    sig_header = call.request.headers.get("X-Sinpapel-Signature", "")
+    body = call.request.body
+    # Verify HMAC roundtrip on the receiver side.
+    verify_signature(body if isinstance(body, bytes) else body.encode(), sig_header, sub.secret)

@@ -7,7 +7,53 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-(Empty — next features post-v0.1.0; S14.5 admin endpoints + Rate limiting + drf-spectacular polish + multi-tenancy + secret rotation candidates parking lot.)
+(Empty — next features post-v0.2.0; rate limiting + drf-spectacular polish + multi-tenancy candidates parking lot.)
+
+## [0.2.0] - 2026-05-16
+
+**Event catalog expansion + Admin REST API.** Closes deferred S14.5 (subscription CRUD). Requires `sinpapel>=0.5.0` for the new signal-based events.
+
+### Added — 7 new event types
+
+Custom Django Signals declared in `sinpapel.signals` (loose coupling preserved — sinpapel core does NOT import sinpapel-webhooks):
+
+- `workflow.predicate.failed` — fired by `WorkflowEngine._validar_predicados` when a `CondicionTransicion` rejects a transition.
+- `workflow.predicate.configured` — `post_save(CondicionTransicion)` create/update.
+- `workflow.transition.preview` — opt-in via `SINPAPEL_EMIT_PREVIEW_EVENTS=True`. Fires at the end of `WorkflowEngine.preview_transition`.
+- `sla.configured` — `post_save(SLAConfiguracion)` create/update.
+- `sla.breached` — fired by `SLAEngine._sla_vencida` when an instance exceeds `dias_maximos`.
+- `sla.action.executed` — fired by `SLAEngine._ejecutar_accion` after dispatching a configured `_accion_*` handler.
+- `workflow.metadata.captured` — consumer-emit pattern (call `emit_event("workflow.metadata.captured", payload, source=instance)` from your own post_save handler when consuming `MetadatosCapturables`).
+
+### Added — Admin REST API (closes S14.5)
+
+New subpackage `sinpapel_webhooks/admin_api/` (DRF viewsets + serializers). Optional install extra: `pip install sinpapel-webhooks[admin]` (depends on `djangorestframework>=3.14`). Defensive URL include — admin routes only mount when DRF is importable.
+
+Routes under `/sinpapel/api/webhooks/admin/`:
+
+- `subscriptions` — full CRUD + `POST /{id}/rotate-secret/` + `POST /{id}/test/` (synthetic delivery via InlineBackend).
+- `deliveries` — read-only list/retrieve + `POST /{id}/retry/` + `POST /requeue-dead-letter/` (`{ids: [...]}` or `{all: true}`).
+- `events` — read-only list (with `delivery_count`) + retrieve (embeds `deliveries` slim array).
+- `inbound-events` — read-only list/retrieve.
+
+Filters supported: `?status=`, `?subscription=`, `?since=` (deliveries); `?event_type=`, `?since=` (events); `?source=`, `?handler_status=`, `?since=` (inbound-events).
+
+### Added — Settings
+
+- `SINPAPEL_WEBHOOKS_ADMIN_PERMISSION` (default `"rest_framework.permissions.IsAdminUser"`) — dotted path to a DRF permission class; resolved at import time.
+- `SINPAPEL_EMIT_PREVIEW_EVENTS` (sinpapel-side, default `False`) — toggles the `workflow.transition.preview` event emission.
+
+### Added — Test infrastructure
+
+- `tests/settings.py` + `tests/urls.py` so the suite runs standalone in this repo (previously required parent-project settings).
+
+### Changed
+
+- Subscription secrets are now masked on read (`***` + last 4 chars). Full value visible only in the create response and `rotate-secret` response (write-only on update).
+
+### Compatibility
+
+- Requires `sinpapel>=0.5.0` for the 4 signal-driven events. Older sinpapel versions still load (defensive import); only the 2 `post_save`-driven events will fire.
 
 ## [0.1.0] - 2026-05-01
 
