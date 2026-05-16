@@ -36,7 +36,7 @@ celery = [
     "celery>=5.3",
 ]
 drf = [
-    "sinpapel-drf @ git+ssh://git@github.com/aprendomx/sinpapel-drf.git@v0.1.0",
+    "sinpapel-drf @ git+ssh://git@github.com/aprendomx/sinpapel-drf.git@v0.2.1",
 ]
 admin = [
     "djangorestframework>=3.14",
