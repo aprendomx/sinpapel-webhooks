@@ -64,6 +64,8 @@ packages = [
 sinpapel_webhooks = "."
 
 [tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "tests.settings"
+django_find_project = false
 addopts = "-m 'not install_smoke'"
 markers = [
     "install_smoke: integration smoke tests requiring uv venv + pip install (skip by default; manual run via -m install_smoke)",

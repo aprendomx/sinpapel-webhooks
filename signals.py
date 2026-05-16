@@ -150,3 +150,44 @@ def on_instancia_documento(sender: type[Model], instance: Model, created: bool, 
     transaction.on_commit(
         lambda: emit_event("document.uploaded", payload, source=instance)
     )
+
+
+# --- CondicionTransicion → workflow.predicate.configured ------------------
+
+
+@receiver(post_save, sender="sinpapel.CondicionTransicion")
+def on_condicion_transicion(sender: type[Model], instance: Model, created: bool, **kwargs: Any) -> None:
+    """Emit workflow.predicate.configured on CondicionTransicion create/update."""
+    payload: dict[str, Any] = {
+        "condicion_id": instance.pk,
+        "transicion_id": getattr(instance, "transicion_id", None),
+        "tipo": getattr(instance, "tipo", None),
+        "configuracion": getattr(instance, "configuracion", None) or {},
+        "mensaje_error": getattr(instance, "mensaje_error", "") or "",
+        "orden": getattr(instance, "orden", 0),
+        "activo": bool(getattr(instance, "activo", False)),
+        "action": "created" if created else "updated",
+    }
+    transaction.on_commit(
+        lambda: emit_event("workflow.predicate.configured", payload, source=instance)
+    )
+
+
+# --- SLAConfiguracion → sla.configured ------------------------------------
+
+
+@receiver(post_save, sender="sinpapel.SLAConfiguracion")
+def on_sla_configuracion(sender: type[Model], instance: Model, created: bool, **kwargs: Any) -> None:
+    """Emit sla.configured on SLAConfiguracion create/update."""
+    payload: dict[str, Any] = {
+        "sla_id": instance.pk,
+        "estado_id": getattr(instance, "estado_id", None),
+        "dias_maximos": getattr(instance, "dias_maximos", None),
+        "accion_vencimiento": getattr(instance, "accion_vencimiento", None),
+        "configuracion_accion": getattr(instance, "configuracion_accion", None) or {},
+        "activo": bool(getattr(instance, "activo", False)),
+        "action": "created" if created else "updated",
+    }
+    transaction.on_commit(
+        lambda: emit_event("sla.configured", payload, source=instance)
+    )
