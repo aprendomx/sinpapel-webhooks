@@ -1,0 +1,17 @@
+sinpapel @ git+ssh://git@github.com/aprendomx/sinpapel.git@v0.5.0
+django-simple-history>=3.4
+requests>=2.31
+
+[admin]
+djangorestframework>=3.14
+
+[celery]
+celery>=5.3
+
+[dev]
+pytest>=9.0
+pytest-django>=4.12
+responses>=0.25
+
+[drf]
+sinpapel-drf @ git+ssh://git@github.com/aprendomx/sinpapel-drf.git@v0.2.1
