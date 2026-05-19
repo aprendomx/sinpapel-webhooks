@@ -23,7 +23,7 @@ pip install "sinpapel-webhooks[celery] @ git+ssh://git@github.com/aprendomx/sinp
 pip install "sinpapel-webhooks[admin] @ git+ssh://git@github.com/aprendomx/sinpapel-webhooks.git@v0.2.0"
 ```
 
-**Requisitos:** Python ≥3.13, Django ≥4.2, sinpapel ≥0.5.0 (para el catálogo de eventos v0.2.0 completo; sinpapel previo sigue funcionando defensivamente — sólo los 2 eventos basados en `post_save` se emiten).
+**Requisitos:** Python ≥3.10, Django ≥5.0, sinpapel ≥0.5.0 (para el catálogo de eventos v0.2.0 completo; sinpapel previo sigue funcionando defensivamente — sólo los 2 eventos basados en `post_save` se emiten).
 
 ---
 
@@ -514,3 +514,9 @@ No. Para push real-time usar Channels separado. Webhooks son callbacks HTTP POST
 **Salientes (v0.2.0+):** `POST /sinpapel/api/webhooks/admin/subscriptions/{id}/rotate-secret/` — el servidor genera un hex de 32 bytes nuevo y la response devuelve el plaintext (única vez). El campo `secret` en GET/PATCH viene enmascarado (`***` + últimos 4).
 
 **Entrantes:** actualiza `SINPAPEL_WEBHOOKS_INBOUND_SECRETS` dict y reinicia el proceso Django. Una ventana dual-secret de overlap queda en backlog.
+
+---
+
+**Licencia:** GPL-3.0-or-later — ver [LICENSE](LICENSE).
+**Fuente:** https://github.com/aprendomx/sinpapel-webhooks
+**Issues:** https://github.com/aprendomx/sinpapel-webhooks/issues

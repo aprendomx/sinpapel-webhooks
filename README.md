@@ -22,7 +22,7 @@ pip install "sinpapel-webhooks[celery] @ git+ssh://git@github.com/aprendomx/sinp
 pip install "sinpapel-webhooks[admin] @ git+ssh://git@github.com/aprendomx/sinpapel-webhooks.git@v0.2.0"
 ```
 
-**Requirements:** Python ≥3.13, Django ≥4.2, sinpapel ≥0.5.0 (for full v0.2.0 event catalog; older sinpapel still works defensively — only the 2 `post_save`-driven events fire).
+**Requirements:** Python ≥3.10, Django ≥5.0, sinpapel ≥0.5.0 (for full v0.2.0 event catalog; older sinpapel still works defensively — only the 2 `post_save`-driven events fire).
 
 ---
 
@@ -695,6 +695,6 @@ No. Para push real-time usar Channels separado. Webhooks son HTTP POST callbacks
 
 ---
 
-**License:** MIT — see [LICENSE](LICENSE).
-**Source:** https://github.com/jadrians/creditos/tree/main/sinpapel_webhooks
-**Issues:** https://github.com/jadrians/creditos/issues
+**License:** GPL-3.0-or-later — see [LICENSE](LICENSE).
+**Source:** https://github.com/aprendomx/sinpapel-webhooks
+**Issues:** https://github.com/aprendomx/sinpapel-webhooks/issues

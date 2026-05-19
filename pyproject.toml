@@ -3,20 +3,24 @@ name = "sinpapel-webhooks"
 version = "0.2.1"
 description = "Event-driven HTTP communication para sinpapel — outbound + inbound webhooks (HMAC signing, pluggable delivery backends, idempotency)"
 readme = "README.md"
-requires-python = ">=3.13"
-license = { text = "MIT" }
+requires-python = ">=3.10"
+license = "GPL-3.0-or-later"
+license-files = ["LICENSE"]
 authors = [
     { name = "Julio Adrián", email = "jadrian.s@gmail.com" },
 ]
 keywords = ["django", "webhooks", "events", "hmac", "sinpapel", "workflow", "outbound", "inbound"]
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 4 - Beta",
     "Framework :: Django",
     "Framework :: Django :: 5.0",
+    "Framework :: Django :: 5.1",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
@@ -43,11 +47,11 @@ admin = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/jadrians/creditos"
-Issues = "https://github.com/jadrians/creditos/issues"
+Homepage = "https://github.com/aprendomx/sinpapel-webhooks"
+Issues = "https://github.com/aprendomx/sinpapel-webhooks/issues"
 
 [build-system]
-requires = ["setuptools>=68"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 # Layout flat post split E16 — package files at repo root.
@@ -66,6 +70,10 @@ packages = [
 
 [tool.setuptools.package-dir]
 sinpapel_webhooks = "."
+
+[tool.setuptools.package-data]
+sinpapel_webhooks = ["py.typed"]
+"sinpapel_webhooks.migrations" = ["*.py"]
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "tests.settings"

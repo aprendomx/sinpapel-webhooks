@@ -7,7 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-(Empty — next features post-v0.2.1; rate limiting + drf-spectacular polish + multi-tenancy candidates parking lot.)
+### Changed
+
+- **License:** MIT → GPL-3.0-or-later (aligns with `sinpapel` core license; ensures derivative-work compatibility).
+- `requires-python` lowered from `>=3.13` to `>=3.10` to match `sinpapel` support matrix.
+- `pyproject.toml` metadata refreshed: `license-files`, `setuptools>=77`, corrected project URLs (`aprendomx/sinpapel-webhooks`), and expanded Python/Django classifiers.
+- Added `py.typed` marker for PEP 561 type-hint support.
+- Added GPL-3.0 license headers to all source files.
+
+(Next features: rate limiting + drf-spectacular polish + multi-tenancy candidates parking lot.)
 
 ## [0.2.1] - 2026-05-16
 
