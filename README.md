@@ -1,11 +1,11 @@
 # sinpapel-webhooks
 
-> **Event-driven HTTP communication for [sinpapel](../sinpapel/)** — outbound
+> **Event-driven HTTP communication for [sinpapel](https://github.com/aprendomx/sinpapel)** — outbound
 > webhooks (signal-driven) + inbound receiver framework. HMAC-SHA256 signing
 > Stripe-compatible, pluggable delivery backends (inline / outbox / celery),
 > idempotency dedup. Production-ready sin broker dependency.
 
-**Status:** v0.2.1 — event catalog expansion + Admin REST API. See [CHANGELOG](CHANGELOG.md) · [README en español](README.es.md).
+**Status:** v0.2.1 — event catalog expansion + Admin REST API. See [CHANGELOG](https://github.com/aprendomx/sinpapel-webhooks/blob/main/CHANGELOG.md) · [README en español](https://github.com/aprendomx/sinpapel-webhooks/blob/main/README.es.md).
 
 ---
 
@@ -604,9 +604,9 @@ Operational response: `python manage.py sinpapel_webhooks_requeue_dead_letter` a
 
 ## 11. Reference
 
-- **Architecture:** [`work/epics/e14-sinpapel-webhooks/design.md`](../work/epics/e14-sinpapel-webhooks/design.md)
-- **ADR-013** (delivery port pluggable): [`dev/decisions/adr-013-webhook-delivery-pluggable-backend.md`](../dev/decisions/adr-013-webhook-delivery-pluggable-backend.md)
-- **ADR-014** (HMAC signing scheme): [`dev/decisions/adr-014-webhook-signing-hmac-sha256.md`](../dev/decisions/adr-014-webhook-signing-hmac-sha256.md)
+- **Architecture:** `work/epics/e14-sinpapel-webhooks/design.md`
+- **ADR-013** (delivery port pluggable): `dev/decisions/adr-013-webhook-delivery-pluggable-backend.md`
+- **ADR-014** (HMAC signing scheme): `dev/decisions/adr-014-webhook-signing-hmac-sha256.md`
 
 ### Public API
 
@@ -643,7 +643,7 @@ from sinpapel_webhooks.models import (
 - **Lockstep:** `sinpapel_webhooks 0.2.x` requires `sinpapel >=0.5.0,<0.6` for full feature set (degrades gracefully on older sinpapel).
 - **Future:** v0.3 may add rate limiting, drf-spectacular OpenAPI schema, multi-tenancy, mTLS, Kafka backend.
 
-See [CHANGELOG.md](CHANGELOG.md) for full change history.
+See [CHANGELOG.md](https://github.com/aprendomx/sinpapel-webhooks/blob/main/CHANGELOG.md) for full change history.
 
 ---
 
@@ -695,6 +695,6 @@ No. Para push real-time usar Channels separado. Webhooks son HTTP POST callbacks
 
 ---
 
-**License:** GPL-3.0-or-later — see [LICENSE](LICENSE).
+**License:** GPL-3.0-or-later — see [LICENSE](https://github.com/aprendomx/sinpapel-webhooks/blob/main/LICENSE).
 **Source:** https://github.com/aprendomx/sinpapel-webhooks
 **Issues:** https://github.com/aprendomx/sinpapel-webhooks/issues

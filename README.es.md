@@ -1,12 +1,12 @@
 # sinpapel-webhooks
 
-> **Comunicación HTTP event-driven para [sinpapel](../sinpapel/)** — webhooks
+> **Comunicación HTTP event-driven para [sinpapel](https://github.com/aprendomx/sinpapel)** — webhooks
 > salientes (disparados por signals) + framework de receptores entrantes.
 > Firma HMAC-SHA256 compatible Stripe, backends de entrega intercambiables
 > (inline / outbox / celery), deduplicación idempotente. Production-ready
 > sin dependencia de broker.
 
-**Estado:** v0.2.1 — catálogo de eventos expandido + Admin REST API. Ver [CHANGELOG](CHANGELOG.md) · [README in English](README.md).
+**Estado:** v0.2.1 — catálogo de eventos expandido + Admin REST API. Ver [CHANGELOG](https://github.com/aprendomx/sinpapel-webhooks/blob/main/CHANGELOG.md) · [README in English](https://github.com/aprendomx/sinpapel-webhooks/blob/main/README.md).
 
 ---
 
@@ -465,7 +465,7 @@ from sinpapel_webhooks.signing import verify_signature  # raises WebhookSignatur
 - **Lockstep:** `sinpapel_webhooks 0.2.x` requiere `sinpapel >=0.5.0,<0.6` para feature set completo (degrada gracefully en sinpapel previo).
 - **Próximo:** v0.3 puede añadir rate limiting, schema OpenAPI vía drf-spectacular, multi-tenancy, mTLS, backend Kafka.
 
-Ver [CHANGELOG.md](CHANGELOG.md) para historial completo.
+Ver [CHANGELOG.md](https://github.com/aprendomx/sinpapel-webhooks/blob/main/CHANGELOG.md) para historial completo.
 
 ---
 
@@ -517,6 +517,6 @@ No. Para push real-time usar Channels separado. Webhooks son callbacks HTTP POST
 
 ---
 
-**Licencia:** GPL-3.0-or-later — ver [LICENSE](LICENSE).
+**Licencia:** GPL-3.0-or-later — ver [LICENSE](https://github.com/aprendomx/sinpapel-webhooks/blob/main/LICENSE).
 **Fuente:** https://github.com/aprendomx/sinpapel-webhooks
 **Issues:** https://github.com/aprendomx/sinpapel-webhooks/issues
