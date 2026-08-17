@@ -5,7 +5,7 @@
 > Stripe-compatible, pluggable delivery backends (inline / outbox / celery),
 > idempotency dedup. Production-ready sin broker dependency.
 
-**Status:** v0.2.0 — event catalog expansion + Admin REST API. See [CHANGELOG](CHANGELOG.md) · [README en español](README.es.md).
+**Status:** v0.2.1 — event catalog expansion + Admin REST API. See [CHANGELOG](CHANGELOG.md) · [README en español](README.es.md).
 
 ---
 
@@ -13,16 +13,16 @@
 
 ```bash
 # Core (incluye outbox backend default — DB-backed queue, no broker required)
-pip install "git+ssh://git@github.com/aprendomx/sinpapel-webhooks.git@v0.2.0"
+pip install sinpapel-webhooks
 
 # Con Celery distributed delivery (gated por extra)
-pip install "sinpapel-webhooks[celery] @ git+ssh://git@github.com/aprendomx/sinpapel-webhooks.git@v0.2.0"
+pip install "sinpapel-webhooks[celery]"
 
 # Con Admin REST API (Subscriptions CRUD + Deliveries/Events read — v0.2.0)
-pip install "sinpapel-webhooks[admin] @ git+ssh://git@github.com/aprendomx/sinpapel-webhooks.git@v0.2.0"
+pip install "sinpapel-webhooks[admin]"
 ```
 
-**Requirements:** Python ≥3.10, Django ≥5.0, sinpapel ≥0.5.0 (for full v0.2.0 event catalog; older sinpapel still works defensively — only the 2 `post_save`-driven events fire).
+**Requirements:** Python ≥3.10, Django ≥5.0, sinpapel ≥0.7.0.
 
 ---
 

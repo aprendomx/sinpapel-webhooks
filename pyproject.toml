@@ -25,7 +25,7 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 dependencies = [
-    "sinpapel @ git+ssh://git@github.com/aprendomx/sinpapel.git@v0.5.0",
+    "sinpapel>=0.7.0",
     "django-simple-history>=3.4",
     "requests>=2.31",
 ]
@@ -40,7 +40,7 @@ celery = [
     "celery>=5.3",
 ]
 drf = [
-    "sinpapel-drf @ git+ssh://git@github.com/aprendomx/sinpapel-drf.git@v0.2.1",
+    "sinpapel-drf>=0.4.1",
 ]
 admin = [
     "djangorestframework>=3.14",

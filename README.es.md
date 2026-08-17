@@ -6,7 +6,7 @@
 > (inline / outbox / celery), deduplicación idempotente. Production-ready
 > sin dependencia de broker.
 
-**Estado:** v0.2.0 — catálogo de eventos expandido + Admin REST API. Ver [CHANGELOG](CHANGELOG.md) · [README in English](README.md).
+**Estado:** v0.2.1 — catálogo de eventos expandido + Admin REST API. Ver [CHANGELOG](CHANGELOG.md) · [README in English](README.md).
 
 ---
 
@@ -14,16 +14,16 @@
 
 ```bash
 # Core (incluye outbox backend default — DB-backed queue, sin broker)
-pip install "git+ssh://git@github.com/aprendomx/sinpapel-webhooks.git@v0.2.0"
+pip install sinpapel-webhooks
 
 # Con entrega distribuida vía Celery (gated por extra)
-pip install "sinpapel-webhooks[celery] @ git+ssh://git@github.com/aprendomx/sinpapel-webhooks.git@v0.2.0"
+pip install "sinpapel-webhooks[celery]"
 
 # Con Admin REST API (Subscriptions CRUD + Deliveries/Events read — v0.2.0)
-pip install "sinpapel-webhooks[admin] @ git+ssh://git@github.com/aprendomx/sinpapel-webhooks.git@v0.2.0"
+pip install "sinpapel-webhooks[admin]"
 ```
 
-**Requisitos:** Python ≥3.10, Django ≥5.0, sinpapel ≥0.5.0 (para el catálogo de eventos v0.2.0 completo; sinpapel previo sigue funcionando defensivamente — sólo los 2 eventos basados en `post_save` se emiten).
+**Requisitos:** Python ≥3.10, Django ≥5.0, sinpapel ≥0.7.0.
 
 ---
 
