@@ -95,9 +95,12 @@ def test_seguimiento_workflow_update_does_not_emit(user):
             event_type="workflow.transition.completed"
         ).count()
 
-        # Update
+        # Update: desde sinpapel 0.8.0 SeguimientoWorkflow es append-only —
+        # el intento de update lanza ValueError, así que un update jamás
+        # puede emitir un webhook (invariante reforzada aguas arriba).
         sw.comentarios = "updated"
-        sw.save()
+        with pytest.raises(ValueError):
+            sw.save()
 
         events_after_update = WebhookEvent.objects.filter(
             event_type="workflow.transition.completed"

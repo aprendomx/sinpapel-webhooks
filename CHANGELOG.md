@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.3] - 2026-08-18
+
+### Changed
+
+- Requiere `sinpapel~=0.8.0` (pin de minor). `SeguimientoWorkflow` ahora es
+  append-only en el core: el escenario "update no emite webhook" pasa a ser
+  imposible por diseño (el update lanza `ValueError`); test actualizado para
+  reflejar la invariante.
+
 ## [0.2.2] - 2026-08-18
 
 ### Changed

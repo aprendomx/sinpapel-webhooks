@@ -1,6 +1,6 @@
 [project]
 name = "sinpapel-webhooks"
-version = "0.2.2"
+version = "0.2.3"
 description = "Event-driven HTTP communication para sinpapel — outbound + inbound webhooks (HMAC signing, pluggable delivery backends, idempotency)"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -25,7 +25,7 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 dependencies = [
-    "sinpapel>=0.7.1",
+    "sinpapel~=0.8.0",
     "django-simple-history>=3.4",
     "requests>=2.31",
 ]
@@ -40,7 +40,7 @@ celery = [
     "celery>=5.3",
 ]
 drf = [
-    "sinpapel-drf>=0.4.2",
+    "sinpapel-drf>=0.4.3",
 ]
 admin = [
     "djangorestframework>=3.14",
