@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.2] - 2026-08-18
+
+### Changed
+
+- Requiere `sinpapel>=0.7.1` (y `sinpapel-drf>=0.4.2` en el extra `drf`).
+  Cambio relevante del core para este paquete: los side effects del motor
+  ahora corren DESPUÉS del commit de la transacción de la transición — los
+  webhooks emitidos desde side effects ya no pueden dispararse para
+  transiciones que hacen rollback. Los receivers de signals
+  (`predicate_failed`, `sla_breached`, etc.) no cambian.
+
 ### Changed
 
 - **License:** MIT → GPL-3.0-or-later (aligns with `sinpapel` core license; ensures derivative-work compatibility).
