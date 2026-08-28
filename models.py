@@ -26,6 +26,7 @@ from __future__ import annotations
 
 import uuid
 
+from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.utils import timezone
@@ -47,7 +48,7 @@ class WebhookSubscription(models.Model):
     )
     active = models.BooleanField(default=True)
     created_by = models.ForeignKey(
-        "auth.User",
+        settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,

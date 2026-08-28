@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.4] - 2026-08-28
+
+### Fixed
+
+- **`AUTH_USER_MODEL` custom ya no rompe el arranque.**
+  `WebhookSubscription.created_by` declaraba el FK con el literal `"auth.User"`.
+  En cualquier proyecto con usuario custom, Django abortaba el system check con
+  `fields.E301` (el campo y su `HistoricalWebhookSubscription`) y
+  `manage.py check` / `migrate` fallaban. Ahora usa `settings.AUTH_USER_MODEL`.
+
+  **Sin migración:** la migración `0001_initial` ya registraba
+  `settings.AUTH_USER_MODEL`; el desajuste vivía solo en la definición del
+  modelo. No hay cambio de esquema al actualizar desde 0.2.3.
+
+  Requiere `sinpapel>=0.8.3`, que corrige el mismo defecto en el core.
+
 ## [0.2.3] - 2026-08-18
 
 ### Changed
