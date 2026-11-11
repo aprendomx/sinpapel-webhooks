@@ -26,7 +26,7 @@ Inbound: receiver framework con @webhook_receiver decorator + HMAC verification
 Public API:
     from sinpapel_webhooks import webhook_receiver, __version__
 """
-__version__ = "0.2.4"
+__version__ = "0.2.5"
 
 # Lazy re-export to avoid Django app loading issues at module import time
 def __getattr__(name: str):
